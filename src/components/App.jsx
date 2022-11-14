@@ -1,50 +1,41 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Section } from './Section/Section';
 import { FeedbackOptions } from './FeedbackOptions/FeedbackOptions';
 import { Statistics } from './Statistics/Statistics';
 import { Notification } from './Notification/Notification';
+import { useState } from 'react';
 
-export class App extends Component {
-  state = {
-    good: 0,
-    neutral: 0,
-    bad: 0,
-  };
-  
-  positiveFeedPercentage = () => {
-    let percentage = Math.floor(
-      ((this.state.good / this.totalFeedback()) * 100).toFixed(0)
-    );
-    if (isNaN(percentage)) {
-      return 0;
-    } else return percentage;
-  };
+export const App = () => {
+  const [good, setGood] = useState(0);
+  const [neutral, setNeutral] = useState(0);
+  const [bad, setBad] = useState(0);
 
-  handleFeedback = e => {
-    switch (e) {
-      case 'good':
-        this.setState(state => ({ good: state.good + 1 }));
-        break;
-      case 'neutral':
-        this.setState(state => ({ neutral: state.neutral + 1 }));
-        break;
-      case 'bad':
-        this.setState(state => ({ bad: state.bad + 1 }));
-        break;
-      default:
-        return 0;
+  const handleFeedback = e => {
+    if (e === 'Good') {
+      setGood(good + 1);
+    } else if (e === 'Neutral') {
+      setNeutral(neutral + 1);
+    } else if (e === 'Bad') {
+      setBad(bad + 1);
     }
   };
 
-  totalFeedback = () => {
-    return this.state.good + this.state.neutral + this.state.bad;
+  const positivePercentage = () => {
+    if (totalFeedback() === 0) {
+      return 0;
+    }
+    return Math.round((good / totalFeedback()) * 100);
   };
 
-  render() {
-    const { good, neutral, bad } = this.state;
-    return (
-      <div
-        style={{
+  const totalFeedback = () => {
+    let total = good + neutral + bad;
+    return total;
+  };
+
+
+  return (
+    <div
+      style={{
         height: '100%',
         display: 'flex',
         alignItems: 'flex-start',
@@ -53,28 +44,28 @@ export class App extends Component {
         color: '#010456',
         justifyContent: 'center',
         margin: '20px',
-        }}
-      >
-        <Section title="Please leave feedback">
+      }}
+    >
+      <Section title="Please leave feedback">
           <FeedbackOptions
-            options={Object.keys(this.state)}
-            onLeaveFeedback={this.handleFeedback}
+            options={['Good', 'Neutral', 'Bad']}
+            onLeaveFeedback={handleFeedback}
           />
         </Section>
+
         <Section title="Statistics">
-          {this.totalFeedback() === 0 ? (
-            <Notification message="There is no feedback" />
-          ) : (
-            <Statistics
-              good={good}
-              neutral={neutral}
-              bad={bad}
-              total={this.totalFeedback()}
-              positivePercentage={this.positiveFeedPercentage()}
-            />
-          )}
-        </Section>
-      </div>
-    );
-  }
-}
+        {totalFeedback() !== 0 ? (
+          <Statistics
+            good={good}
+            neutral={neutral}
+            bad={bad}
+            total={totalFeedback()}
+            positivePercentage={positivePercentage()}
+          />
+        ) : (
+          <Notification message="There is no feedback"></Notification>
+        )}
+      </Section>
+    </div>
+  );
+};
